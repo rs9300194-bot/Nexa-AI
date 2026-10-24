@@ -673,8 +673,9 @@ Código Completo (index.html)
         throw new Error('Chave de API do Google AI Studio não configurada. Clique em "Configurar Chave" no canto superior.');
       }
 
-      // Usando modelo gemini-3.8-flash (Gratuito e de baixa latência)
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+      // Usando modelo gemini-3.8-flash (Gratuito e de baixa 
+const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
+
 
       const payload = {
         contents: [
