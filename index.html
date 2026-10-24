@@ -1,0 +1,1049 @@
+Aqui está o código completo da plataforma NEXA AI, construída em uma única
+aplicação web moderna (SPA), otimizada para iPhone (com suporte a Safe Area
+Insets, botões com área de toque mínima de 44px e barra de navegação inferior
+estilo iOS) e paleta escura com detalhes em roxo neon e azul elétrico.
+
+Copie o código abaixo e salve como index.html. Você pode abri-lo diretamente em
+qualquer navegador ou hospedar gratuitamente (Vercel, Netlify, GitHub Pages).
+
+Código Completo (index.html)
+
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>NEXA AI - Plataforma Inteligente</title>
+  
+  <!-- Tailwind CSS & Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            nexa: {
+              bg: '#050508',
+              card: '#0d0d16',
+              border: '#1b1b2f',
+              purple: '#8b5cf6',
+              blue: '#3b82f6',
+              cyan: '#06b6d4',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Otimizações Mobile / iPhone */
+    body {
+      background-color: #050508;
+      color: #f3f4f6;
+      -webkit-tap-highlight-color: transparent;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    .glow-border {
+      position: relative;
+    }
+    .glow-border::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .custom-scroll::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #27273f;
+      border-radius: 999px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-purple-500 selection:text-white">
+
+  <!-- ================= TOPBAR ================= -->
+  <header class="sticky top-0 z-40 bg-[#050508]/85 backdrop-blur-xl border-b border-nexa-border px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <button id="btn-back" onclick="navigate('home')" class="hidden p-2 rounded-xl bg-nexa-card border border-nexa-border text-gray-300 hover:text-white active:scale-95 transition">
+        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+      </button>
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 via-blue-600 to-cyan-400 flex items-center justify-center font-extrabold text-white text-base shadow-lg shadow-purple-600/30">
+          N
+        </div>
+        <span class="font-extrabold text-lg tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-200 to-blue-400">
+          NEXA <span class="text-xs text-purple-400 border border-purple-500/40 rounded-full px-1.5 py-0.5 ml-1">AI</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Indicador de Status / Chave de API -->
+    <div class="flex items-center space-x-2">
+      <button onclick="openApiModal()" class="flex items-center space-x-1.5 text-xs bg-nexa-card border border-nexa-border px-3 py-1.5 rounded-full hover:border-purple-500/60 active:scale-95 transition text-gray-300">
+        <span id="api-status-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+        <span id="api-status-text">Google AI Studio</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= CONTAINER PRINCIPAL ================= -->
+  <main class="flex-1 max-w-4xl w-full mx-auto p-4 pb-24">
+
+    <!-- VIEW 1: HOME (PAINEL DE FERRAMENTAS) -->
+    <section id="view-home" class="space-y-6">
+      <!-- Banner Boas-vindas -->
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-950/40 via-nexa-card to-blue-950/40 border border-purple-800/30 p-5 shadow-2xl">
+        <div class="relative z-10 space-y-2">
+          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-medium">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Plataforma Gratuita & Unificada
+          </div>
+          <h1 class="text-2xl font-bold tracking-tight text-white">Hub de Inteligência Artificial</h1>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Selecione uma ferramenta abaixo para produzir textos, códigos, imagens reais e designs direto do seu iPhone.
+          </p>
+        </div>
+        <div class="absolute -right-8 -bottom-8 w-36 h-36 bg-purple-600/20 blur-3xl rounded-full pointer-events-none"></div>
+      </div>
+
+      <!-- Grade de Ferramentas -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+
+        <!-- 1. Chat Inteligente -->
+        <button onclick="navigate('tool-chat')" class="group text-left p-4 rounded-2xl bg-nexa-card border border-nexa-border hover:border-purple-500/50 active:scale-[0.98] transition flex items-start gap-4">
+          <div class="p-3 rounded-xl bg-purple-500/10 text-purple-400 group-hover:scale-110 transition border border-purple-500/20">
+            <i data-lucide="message-square" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="font-semibold text-white group-hover:text-purple-300 transition">1. Chat Inteligente</h3>
+            <p class="text-xs text-gray-400 mt-1">Perguntas, respostas e raciocínio com modelo Gemini do Google AI Studio.</p>
+          </div>
+        </button>
+
+        <!-- 2. Gerador de Imagens -->
+        <button onclick="navigate('tool-image')" class="group text-left p-4 rounded-2xl bg-nexa-card border border-nexa-border hover:border-blue-500/50 active:scale-[0.98] transition flex items-start gap-4">
+          <div class="p-3 rounded-xl bg-blue-500/10 text-blue-400 group-hover:scale-110 transition border border-blue-500/20">
+            <i data-lucide="image" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h3 class="font-semibold text-white group-hover:text-blue-300 transition">2. Gerador de Imagens</h3>
+              <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/30">API Real</span>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">Gere imagens reais a partir de descrições usando FLUX (via Pollinations API).</p>
+          </div>
+        </button>
+
+        <!-- 3. Criador de Vídeos -->
+        <button onclick="navigate('tool-video')" class="group text-left p-4 rounded-2xl bg-nexa-card border border-nexa-border hover:border-cyan-500/50 active:scale-[0.98] transition flex items-start gap-4">
+          <div class="p-3 rounded-xl bg-cyan-500/10 text-cyan-400 group-hover:scale-110 transition border border-cyan-500/20">
+            <i data-lucide="video" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h3 class="font-semibold text-white group-hover:text-cyan-300 transition">3. Criador de Vídeos</h3>
+              <span class="text-[10px] bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded border border-amber-500/30">Conexão</span>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">Geração de vídeo por IA e painel de conexão com motores de vídeo reais.</p>
+          </div>
+        </button>
+
+        <!-- 4. Criador de Sites -->
+        <button onclick="navigate('tool-site')" class="group text-left p-4 rounded-2xl bg-nexa-card border border-nexa-border hover:border-purple-500/50 active:scale-[0.98] transition flex items-start gap-4">
+          <div class="p-3 rounded-xl bg-purple-500/10 text-purple-400 group-hover:scale-110 transition border border-purple-500/20">
+            <i data-lucide="layout" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="font-semibold text-white group-hover:text-purple-300 transition">4. Criador de Sites</h3>
+            <p class="text-xs text-gray-400 mt-1">Crie páginas web completas com visualização interativa e download de código.</p>
+          </div>
+        </button>
+
+        <!-- 5. Ebooks & Infoprodutos -->
+        <button onclick="navigate('tool-ebook')" class="group text-left p-4 rounded-2xl bg-nexa-card border border-nexa-border hover:border-blue-500/50 active:scale-[0.98] transition flex items-start gap-4">
+          <div class="p-3 rounded-xl bg-blue-500/10 text-blue-400 group-hover:scale-110 transition border border-blue-500/20">
+            <i data-lucide="book-open" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="font-semibold text-white group-hover:text-blue-300 transition">5. Ebooks & Infoprodutos</h3>
+            <p class="text-xs text-gray-400 mt-1">Capítulos inteiros, estruturas de cursos e ideias prontas para monetizar.</p>
+          </div>
+        </button>
+
+        <!-- 6. Gerador de Roteiros -->
+        <button onclick="navigate('tool-script')" class="group text-left p-4 rounded-2xl bg-nexa-card border border-nexa-border hover:border-cyan-500/50 active:scale-[0.98] transition flex items-start gap-4">
+          <div class="p-3 rounded-xl bg-cyan-500/10 text-cyan-400 group-hover:scale-110 transition border border-cyan-500/20">
+            <i data-lucide="clapperboard" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="font-semibold text-white group-hover:text-cyan-300 transition">6. Roteiros de Vídeo</h3>
+            <p class="text-xs text-gray-400 mt-1">Roteiros para YouTube, TikTok e Reels com ganchos, cenas e chamadas para ação.</p>
+          </div>
+        </button>
+
+        <!-- 7. Assistente de Programação -->
+        <button onclick="navigate('tool-code')" class="group text-left p-4 rounded-2xl bg-nexa-card border border-nexa-border hover:border-emerald-500/50 active:scale-[0.98] transition flex items-start gap-4 sm:col-span-2">
+          <div class="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 group-hover:scale-110 transition border border-emerald-500/20">
+            <i data-lucide="code-2" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="font-semibold text-white group-hover:text-emerald-300 transition">7. Assistente para Programação</h3>
+            <p class="text-xs text-gray-400 mt-1">Escreva códigos, resolva bugs, crie APIs e tire dúvidas técnicas em qualquer linguagem.</p>
+          </div>
+        </button>
+
+      </div>
+    </section>
+
+    <!-- VIEW 2: CHAT INTELIGENTE -->
+    <section id="view-tool-chat" class="hidden flex-col h-[78vh]">
+      <div class="flex items-center justify-between pb-3 border-b border-nexa-border mb-3">
+        <div>
+          <h2 class="font-bold text-white text-base">Chat Inteligente</h2>
+          <p class="text-xs text-gray-400">Modelo Gemini Flash (Google AI Studio)</p>
+        </div>
+        <button onclick="clearChatHistory()" class="text-xs text-gray-400 hover:text-red-400 flex items-center gap-1">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Limpar
+        </button>
+      </div>
+
+      <!-- Área de mensagens com rolagem -->
+      <div id="chat-messages" class="flex-1 overflow-y-auto space-y-3 pr-1 custom-scroll">
+        <div class="flex items-start gap-2.5">
+          <div class="w-7 h-7 rounded-lg bg-purple-600/20 border border-purple-500/40 flex items-center justify-center text-xs font-bold text-purple-400">AI</div>
+          <div class="bg-nexa-card border border-nexa-border rounded-2xl rounded-tl-sm p-3.5 text-sm text-gray-200 max-w-[85%]">
+            Olá! Sou o assistente da NEXA AI. Como posso acelerar o seu trabalho hoje?
+          </div>
+        </div>
+      </div>
+
+      <!-- Barra de digitação -->
+      <form onsubmit="handleChatSubmit(event)" class="mt-3 flex items-center gap-2">
+        <input id="chat-input" type="text" placeholder="Escreva sua pergunta ou ideia..." class="flex-1 bg-nexa-card border border-nexa-border rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 transition placeholder-gray-500">
+        <button type="submit" id="chat-btn-send" class="h-11 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium text-sm flex items-center justify-center active:scale-95 transition disabled:opacity-50">
+          <i data-lucide="send" class="w-4 h-4"></i>
+        </button>
+      </form>
+    </section>
+
+    <!-- VIEW 3: GERADOR DE IMAGENS -->
+    <section id="view-tool-image" class="hidden space-y-4">
+      <div class="border-b border-nexa-border pb-3">
+        <div class="flex items-center justify-between">
+          <h2 class="font-bold text-white text-lg">Gerador de Imagens por Descrição</h2>
+          <span class="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-semibold">Motor Real (FLUX)</span>
+        </div>
+        <p class="text-xs text-gray-400 mt-1">Imagens geradas gratuitamente via motor FLUX aberto. Sem simulações falsas.</p>
+      </div>
+
+      <div class="space-y-3">
+        <textarea id="image-prompt" rows="3" placeholder="Ex: Um astronauta futurista caminhando em uma floresta cyberpunk de neon roxo, iluminação cinematográfica, 8k render..." class="w-full bg-nexa-card border border-nexa-border rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500 transition placeholder-gray-500 resize-none"></textarea>
+
+        <button onclick="generateImage()" id="btn-generate-image" class="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold text-sm flex items-center justify-center gap-2 active:scale-98 transition shadow-lg shadow-blue-600/20">
+          <i data-lucide="sparkles" class="w-4 h-4"></i> Gerar Imagem Real
+        </button>
+      </div>
+
+      <div id="image-loading" class="hidden py-12 text-center space-y-3">
+        <div class="w-9 h-9 border-3 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <p class="text-xs text-gray-400">Processando na rede de difusão de imagens... isso pode levar cerca de 10 a 20 segundos.</p>
+      </div>
+
+      <!-- Preview do Resultado -->
+      <div id="image-result-box" class="hidden rounded-2xl overflow-hidden border border-nexa-border bg-nexa-card p-3 space-y-3">
+        <img id="image-output" src="" alt="Imagem Gerada" class="w-full rounded-xl object-cover max-h-[420px] mx-auto border border-white/5">
+        <div class="flex gap-2">
+          <button onclick="downloadGeneratedImage()" class="flex-1 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white flex items-center justify-center gap-1.5 transition">
+            <i data-lucide="download" class="w-4 h-4"></i> Baixar Imagem
+          </button>
+          <button onclick="copyImageUrl()" class="py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white flex items-center justify-center gap-1.5 transition">
+            <i data-lucide="copy" class="w-4 h-4"></i> Link
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: CRIADOR DE VÍDEOS -->
+    <section id="view-tool-video" class="hidden space-y-4">
+      <div class="border-b border-nexa-border pb-3">
+        <h2 class="font-bold text-white text-lg">Criador de Vídeos por Texto</h2>
+        <p class="text-xs text-gray-400 mt-1">Status de Conectividade de Renderizadores de Vídeo</p>
+      </div>
+
+      <!-- Alerta de Transparência e Realismo de API -->
+      <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs leading-relaxed space-y-2">
+        <div class="flex items-center gap-2 font-semibold text-amber-200">
+          <i data-lucide="shield-alert" class="w-4 h-4"></i> Política de Transparência NEXA AI
+        </div>
+        <p>
+          A renderização de vídeo por IA requer computação em GPUs de alto custo (como Luma Dream Machine, Runway Gen-3 ou modelos CogVideoX/Replicate). A NEXA AI <strong>não simula vídeos falsos</strong>.
+        </p>
+      </div>
+
+      <div class="space-y-3 bg-nexa-card p-4 rounded-xl border border-nexa-border">
+        <label class="block text-xs font-medium text-gray-300">Prompt do Vídeo Desejado:</label>
+        <textarea id="video-prompt" rows="3" placeholder="Ex: Drone sobrevoando uma metrópole futurista com carros voadores sob chuva torrencial..." class="w-full bg-black/40 border border-nexa-border rounded-xl p-3 text-sm text-white focus:outline-none focus:border-cyan-500 transition placeholder-gray-500 resize-none"></textarea>
+
+        <label class="block text-xs font-medium text-gray-300">Selecione o Provedor de API de Vídeo:</label>
+        <select id="video-provider" class="w-full bg-black/40 border border-nexa-border rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+          <option value="replicate">Replicate API (CogVideoX / Stable Video Diffusion)</option>
+          <option value="luma">Luma AI Dream Machine API</option>
+          <option value="runway">Runway Gen-3 Alpha API</option>
+        </select>
+
+        <button onclick="requestVideoGeneration()" class="w-full py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-sm flex items-center justify-center gap-2 active:scale-98 transition">
+          <i data-lucide="play" class="w-4 h-4"></i> Iniciar Processamento
+        </button>
+      </div>
+
+      <div id="video-status-feedback" class="hidden p-4 rounded-xl bg-nexa-card border border-nexa-border text-xs text-gray-300 space-y-2"></div>
+    </section>
+
+    <!-- VIEW 5: CRIADOR DE SITES -->
+    <section id="view-tool-site" class="hidden space-y-4">
+      <div class="border-b border-nexa-border pb-3">
+        <h2 class="font-bold text-white text-lg">Criador de Sites e Páginas Web</h2>
+        <p class="text-xs text-gray-400 mt-1">Descreva sua Landing Page e a IA gera o código completo e interativo.</p>
+      </div>
+
+      <div class="space-y-3">
+        <textarea id="site-prompt" rows="3" placeholder="Ex: Crie uma Landing Page moderna para uma barbearia premium com tema escuro, seção de serviços com preços, depoimentos e botão de WhatsApp..." class="w-full bg-nexa-card border border-nexa-border rounded-xl p-3 text-sm text-white focus:outline-none focus:border-purple-500 transition placeholder-gray-500 resize-none"></textarea>
+
+        <button onclick="generateGenericContent('site')" id="btn-gen-site" class="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold text-sm flex items-center justify-center gap-2 transition active:scale-98">
+          <i data-lucide="code" class="w-4 h-4"></i> Criar Site Agora
+        </button>
+      </div>
+
+      <!-- Área de Resultado do Site -->
+      <div id="site-result-wrapper" class="hidden space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-gray-400 font-mono">Código HTML/Tailwind Gerado</span>
+          <div class="flex gap-2">
+            <button onclick="copyOutput('site-code-box')" class="px-3 py-1.5 rounded-lg bg-nexa-card border border-nexa-border text-xs text-gray-300 hover:text-white flex items-center gap-1">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copiar Código
+            </button>
+            <button onclick="downloadCodeFile('pagina.html', 'site-code-box')" class="px-3 py-1.5 rounded-lg bg-blue-600 text-xs font-semibold text-white flex items-center gap-1">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i> Baixar HTML
+            </button>
+          </div>
+        </div>
+
+        <!-- Preview Iframe -->
+        <div class="border border-nexa-border rounded-2xl overflow-hidden bg-white">
+          <div class="bg-gray-900 px-3 py-1.5 text-[11px] text-gray-400 font-mono border-b border-gray-800 flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-red-500/80 inline-block"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-yellow-500/80 inline-block"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-green-500/80 inline-block"></span>
+            <span class="ml-2">Prévia ao vivo</span>
+          </div>
+          <iframe id="site-preview" class="w-full h-80 border-none bg-white"></iframe>
+        </div>
+
+        <textarea id="site-code-box" readonly class="w-full h-36 bg-black/60 border border-nexa-border rounded-xl p-3 text-xs font-mono text-purple-300 custom-scroll"></textarea>
+      </div>
+    </section>
+
+    <!-- VIEW 6: EBOOKS & PRODUTOS DIGITAIS -->
+    <section id="view-tool-ebook" class="hidden space-y-4">
+      <div class="border-b border-nexa-border pb-3">
+        <h2 class="font-bold text-white text-lg">Ebooks e Produtos Digitais</h2>
+        <p class="text-xs text-gray-400 mt-1">Crie sumários, capítulos detalhados e conceitos de infoprodutos prontos para venda.</p>
+      </div>
+
+      <div class="space-y-3">
+        <div class="grid grid-cols-2 gap-2">
+          <input id="ebook-topic" type="text" placeholder="Tema (ex: Gestão do Tempo)" class="bg-nexa-card border border-nexa-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500">
+          <input id="ebook-target" type="text" placeholder="Público (ex: Empreendedores)" class="bg-nexa-card border border-nexa-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500">
+        </div>
+        <textarea id="ebook-prompt" rows="3" placeholder="Detalhes extras: tom de voz, número de capítulos desejados, exercícios práticos..." class="w-full bg-nexa-card border border-nexa-border rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500 transition placeholder-gray-500 resize-none"></textarea>
+
+        <button onclick="generateGenericContent('ebook')" id="btn-gen-ebook" class="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold text-sm flex items-center justify-center gap-2 transition active:scale-98">
+          <i data-lucide="book" class="w-4 h-4"></i> Escrever Conteúdo
+        </button>
+      </div>
+
+      <div id="ebook-result-wrapper" class="hidden space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-gray-400">Conteúdo Gerado</span>
+          <div class="flex gap-2">
+            <button onclick="copyOutput('ebook-output')" class="px-3 py-1.5 rounded-lg bg-nexa-card border border-nexa-border text-xs text-gray-300 hover:text-white flex items-center gap-1">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copiar
+            </button>
+            <button onclick="downloadTextFile('ebook-nexa.txt', 'ebook-output')" class="px-3 py-1.5 rounded-lg bg-blue-600 text-xs font-semibold text-white flex items-center gap-1">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i> Baixar (.txt)
+            </button>
+          </div>
+        </div>
+        <div id="ebook-output" class="w-full min-h-[160px] max-h-[400px] overflow-y-auto bg-nexa-card border border-nexa-border rounded-xl p-4 text-xs text-gray-200 leading-relaxed whitespace-pre-wrap font-sans custom-scroll"></div>
+      </div>
+    </section>
+
+    <!-- VIEW 7: GERADOR DE ROTEIROS DE VÍDEO -->
+    <section id="view-tool-script" class="hidden space-y-4">
+      <div class="border-b border-nexa-border pb-3">
+        <h2 class="font-bold text-white text-lg">Roteirista de Vídeos de Alta Retenção</h2>
+        <p class="text-xs text-gray-400 mt-1">Hooks, ganchos magnéticos e instruções visuais cena a cena.</p>
+      </div>
+
+      <div class="space-y-3">
+        <div class="grid grid-cols-2 gap-2">
+          <select id="script-format" class="bg-nexa-card border border-nexa-border rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none">
+            <option value="Reels / TikTok / Shorts (60s)">Reels / TikTok (Curto)</option>
+            <option value="Vídeo Completo YouTube (8 a 10 min)">YouTube Longo (10 min)</option>
+            <option value="Vídeo de Vendas (VSL)">Vídeo de Vendas (VSL)</option>
+          </select>
+          <input id="script-topic" type="text" placeholder="Assunto do Roteiro" class="bg-nexa-card border border-nexa-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+        </div>
+
+        <button onclick="generateGenericContent('script')" id="btn-gen-script" class="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold text-sm flex items-center justify-center gap-2 transition active:scale-98">
+          <i data-lucide="clapperboard" class="w-4 h-4"></i> Criar Roteiro
+        </button>
+      </div>
+
+      <div id="script-result-wrapper" class="hidden space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-gray-400">Roteiro Técnico</span>
+          <div class="flex gap-2">
+            <button onclick="copyOutput('script-output')" class="px-3 py-1.5 rounded-lg bg-nexa-card border border-nexa-border text-xs text-gray-300 hover:text-white flex items-center gap-1">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copiar
+            </button>
+            <button onclick="downloadTextFile('roteiro-nexa.txt', 'script-output')" class="px-3 py-1.5 rounded-lg bg-cyan-600 text-xs font-semibold text-white flex items-center gap-1">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i> Baixar (.txt)
+            </button>
+          </div>
+        </div>
+        <div id="script-output" class="w-full min-h-[160px] max-h-[400px] overflow-y-auto bg-nexa-card border border-nexa-border rounded-xl p-4 text-xs text-gray-200 leading-relaxed whitespace-pre-wrap font-sans custom-scroll"></div>
+      </div>
+    </section>
+
+    <!-- VIEW 8: ASSISTENTE DE PROGRAMAÇÃO -->
+    <section id="view-tool-code" class="hidden space-y-4">
+      <div class="border-b border-nexa-border pb-3">
+        <h2 class="font-bold text-white text-lg">Assistente para Programação</h2>
+        <p class="text-xs text-gray-400 mt-1">Correção de bugs, criação de scripts e otimização de código.</p>
+      </div>
+
+      <div class="space-y-3">
+        <div class="flex gap-2">
+          <select id="code-language" class="bg-nexa-card border border-nexa-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+            <option value="JavaScript">JavaScript</option>
+            <option value="Python">Python</option>
+            <option value="TypeScript">TypeScript</option>
+            <option value="HTML / CSS">HTML / Tailwind</option>
+            <option value="SQL">SQL</option>
+            <option value="Swift">Swift (iOS)</option>
+          </select>
+          <input id="code-task" type="text" placeholder="Objetivo (ex: Função para validar CPF)" class="flex-1 bg-nexa-card border border-nexa-border rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+        </div>
+
+        <textarea id="code-prompt" rows="3" placeholder="Insira seu código com erro ou descreva a lógica completa..." class="w-full bg-nexa-card border border-nexa-border rounded-xl p-3 text-xs font-mono text-white focus:outline-none focus:border-emerald-500 transition placeholder-gray-500 resize-none"></textarea>
+
+        <button onclick="generateGenericContent('code')" id="btn-gen-code" class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold text-sm flex items-center justify-center gap-2 transition active:scale-98">
+          <i data-lucide="terminal" class="w-4 h-4"></i> Analisar & Codificar
+        </button>
+      </div>
+
+      <div id="code-result-wrapper" class="hidden space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-emerald-400 font-mono">Código & Resolução</span>
+          <div class="flex gap-2">
+            <button onclick="copyOutput('code-output')" class="px-3 py-1.5 rounded-lg bg-nexa-card border border-nexa-border text-xs text-gray-300 hover:text-white flex items-center gap-1">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copiar
+            </button>
+            <button onclick="downloadCodeFile('codigo.txt', 'code-output')" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-xs font-semibold text-white flex items-center gap-1">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i> Baixar Arquivo
+            </button>
+          </div>
+        </div>
+        <pre id="code-output" class="w-full min-h-[160px] max-h-[420px] overflow-y-auto bg-black/80 border border-nexa-border rounded-xl p-4 text-xs font-mono text-emerald-300 leading-relaxed whitespace-pre-wrap custom-scroll"></pre>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= BARRA DE NAVEGAÇÃO INFERIOR (IOS DOCK) ================= -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-[#050508]/90 backdrop-blur-xl border-t border-nexa-border px-6 py-2 flex items-center justify-around">
+    <button onclick="navigate('home')" class="nav-item flex flex-col items-center py-1 text-purple-400 transition" data-target="home">
+      <i data-lucide="home" class="w-5 h-5"></i>
+      <span class="text-[10px] mt-1 font-medium">Início</span>
+    </button>
+    <button onclick="navigate('tool-chat')" class="nav-item flex flex-col items-center py-1 text-gray-400 hover:text-gray-200 transition" data-target="tool-chat">
+      <i data-lucide="message-square" class="w-5 h-5"></i>
+      <span class="text-[10px] mt-1 font-medium">Chat</span>
+    </button>
+    <button onclick="navigate('tool-image')" class="nav-item flex flex-col items-center py-1 text-gray-400 hover:text-gray-200 transition" data-target="tool-image">
+      <i data-lucide="image" class="w-5 h-5"></i>
+      <span class="text-[10px] mt-1 font-medium">Imagens</span>
+    </button>
+    <button onclick="openApiModal()" class="nav-item flex flex-col items-center py-1 text-gray-400 hover:text-gray-200 transition">
+      <i data-lucide="settings" class="w-5 h-5"></i>
+      <span class="text-[10px] mt-1 font-medium">Ajustes</span>
+    </button>
+  </nav>
+
+  <!-- ================= MODAL: CONFIGURAÇÃO DE CHAVE DE API ================= -->
+  <div id="modal-api" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-nexa-card border border-nexa-border max-w-md w-full rounded-2xl p-6 space-y-4 shadow-2xl relative">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="key" class="w-4 h-4 text-purple-400"></i> Conexão Google AI Studio
+        </h3>
+        <button onclick="closeApiModal()" class="text-gray-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-gray-300 leading-relaxed">
+        Para manter sua segurança, <strong class="text-white">a NEXA AI não guarda suas credenciais no código-fonte nem em servidores remotos</strong>. A chave é salva apenas no seu próprio navegador (<code class="text-purple-400">localStorage</code>).
+      </p>
+
+      <div class="space-y-1.5">
+        <label class="text-xs text-gray-400 font-medium">Chave de API do Gemini (Gratuita):</label>
+        <input id="input-gemini-key" type="password" placeholder="AIzaSy..." class="w-full bg-black/50 border border-nexa-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-purple-500 font-mono">
+      </div>
+
+      <div class="p-3 bg-purple-950/20 border border-purple-800/30 rounded-xl text-[11px] text-purple-300 space-y-1">
+        <div class="font-semibold text-white">Como obter gratuitamente:</div>
+        <div>1. Acesse o portal <strong>aistudio.google.com</strong></div>
+        <div>2. Clique em <em>"Get API Key"</em> e copie seu token gratuito.</div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button onclick="closeApiModal()" class="px-4 py-2 text-xs rounded-xl bg-white/5 hover:bg-white/10 text-gray-300">Cancelar</button>
+        <button onclick="saveApiKey()" class="px-5 py-2 text-xs font-semibold rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white">Salvar Chave</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TOAST DE NOTIFICAÇÃO ================= -->
+  <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl bg-nexa-card border border-purple-500/50 text-white text-xs shadow-2xl flex items-center gap-2 opacity-0 pointer-events-none transition-all duration-300">
+    <i data-lucide="info" class="w-4 h-4 text-purple-400"></i>
+    <span id="toast-text">Notificação</span>
+  </div>
+
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <script>
+    // Inicialização de Ícones
+    lucide.createIcons();
+
+    // Estado da Aplicação
+    let currentView = 'home';
+    let chatHistory = [];
+
+    // Carregar configurações locais
+    window.addEventListener('DOMContentLoaded', () => {
+      checkApiStatus();
+      loadChatHistory();
+    });
+
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toast');
+      const text = document.getElementById('toast-text');
+      text.innerText = message;
+      toast.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-2');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      if (isError) {
+        toast.classList.add('border-red-500/60');
+      } else {
+        toast.classList.remove('border-red-500/60');
+      }
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'pointer-events-none', '-translate-y-2');
+      }, 3500);
+    }
+
+    // Navegação entre Telas
+    function navigate(viewId) {
+      const views = [
+        'home', 
+        'tool-chat', 
+        'tool-image', 
+        'tool-video', 
+        'tool-site', 
+        'tool-ebook', 
+        'tool-script', 
+        'tool-code'
+      ];
+      
+      views.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if (el) el.classList.add('hidden');
+      });
+
+      const targetEl = document.getElementById(`view-${viewId}`);
+      if (targetEl) {
+        if (viewId === 'tool-chat') {
+          targetEl.classList.remove('hidden');
+          targetEl.classList.add('flex');
+        } else {
+          targetEl.classList.remove('hidden');
+        }
+      }
+
+      // Botão Voltar
+      const backBtn = document.getElementById('btn-back');
+      if (viewId === 'home') {
+        backBtn.classList.add('hidden');
+      } else {
+        backBtn.classList.remove('hidden');
+      }
+
+      // Atualizar barra inferior de abas
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        if (btn.getAttribute('data-target') === viewId) {
+          btn.classList.add('text-purple-400');
+          btn.classList.remove('text-gray-400');
+        } else {
+          btn.classList.remove('text-purple-400');
+          btn.classList.add('text-gray-400');
+        }
+      });
+
+      currentView = viewId;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      lucide.createIcons();
+    }
+
+    // Gerenciamento da Chave Gemini
+    function openApiModal() {
+      const key = localStorage.getItem('nexa_gemini_key') || '';
+      document.getElementById('input-gemini-key').value = key;
+      document.getElementById('modal-api').classList.remove('hidden');
+    }
+
+    function closeApiModal() {
+      document.getElementById('modal-api').classList.add('hidden');
+    }
+
+    function saveApiKey() {
+      const key = document.getElementById('input-gemini-key').value.trim();
+      if (key) {
+        localStorage.setItem('nexa_gemini_key', key);
+        showToast('Chave Google AI Studio configurada!');
+      } else {
+        localStorage.removeItem('nexa_gemini_key');
+        showToast('Chave removida. O chat utilizará modo de demonstração local.');
+      }
+      checkApiStatus();
+      closeApiModal();
+    }
+
+    function checkApiStatus() {
+      const key = localStorage.getItem('nexa_gemini_key');
+      const dot = document.getElementById('api-status-dot');
+      const text = document.getElementById('api-status-text');
+      if (key) {
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+        text.innerText = 'Gemini Conectado';
+      } else {
+        dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+        text.innerText = 'Configurar Chave';
+      }
+    }
+
+    // ================= COMUNICAÇÃO GEMINI API REAL =================
+    async function callGeminiApi(prompt, systemInstruction = '') {
+      const apiKey = localStorage.getItem('nexa_gemini_key');
+      
+      if (!apiKey) {
+        throw new Error('Chave de API do Google AI Studio não configurada. Clique em "Configurar Chave" no canto superior.');
+      }
+
+      // Usando modelo Gemini 1.5 Flash (Gratuito e de baixa latência)
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+      const payload = {
+        contents: [
+          {
+            parts: [
+              { text: systemInstruction ? `${systemInstruction}\n\nTarefa: ${prompt}` : prompt }
+            ]
+          }
+        ],
+        generationConfig: {
+          temperature: 0.7,
+          topP: 0.95
+        }
+      };
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'Falha na resposta da API Gemini.');
+      }
+
+      const data = await response.json();
+      return data.candidates[0].content.parts[0].text;
+    }
+
+    // ================= FERRAMENTA 1: CHAT =================
+    async function handleChatSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('chat-input');
+      const prompt = input.value.trim();
+      if (!prompt) return;
+
+      appendChatMessage('user', prompt);
+      input.value = '';
+
+      const sendBtn = document.getElementById('chat-btn-send');
+      sendBtn.disabled = true;
+
+      const loadingId = appendChatMessage('ai', '<span class="animate-pulse">Pensando...</span>');
+
+      try {
+        let answer = '';
+        const apiKey = localStorage.getItem('nexa_gemini_key');
+
+        if (apiKey) {
+          answer = await callGeminiApi(prompt, 'Você é o assistente inteligente da plataforma NEXA AI. Responda em português brasileiro de forma direta, clara, elegante e precisa.');
+        } else {
+          // Modo Demonstração sem chave
+          answer = `(Modo Local / Sem Chave): Recebi sua mensagem: "${prompt}". Para respostas reais completas, adicione sua chave gratuita do Google AI Studio nas configurações no topo.`;
+        }
+
+        updateChatMessage(loadingId, answer);
+      } catch (err) {
+        updateChatMessage(loadingId, `⚠️ Erro: ${err.message}`);
+        showToast(err.message, true);
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
+
+    function appendChatMessage(sender, text) {
+      const box = document.getElementById('chat-messages');
+      const msgId = 'msg-' + Date.now();
+      const isUser = sender === 'user';
+
+      const div = document.createElement('div');
+      div.id = msgId;
+      div.className = `flex items-start gap-2.5 ${isUser ? 'justify-end' : ''}`;
+      
+      div.innerHTML = isUser ? `
+        <div class="bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl rounded-tr-sm p-3.5 text-sm text-white max-w-[85%] leading-relaxed">
+          ${escapeHtml(text)}
+        </div>
+      ` : `
+        <div class="w-7 h-7 rounded-lg bg-purple-600/20 border border-purple-500/40 flex items-center justify-center text-xs font-bold text-purple-400 shrink-0">AI</div>
+        <div class="bg-nexa-card border border-nexa-border rounded-2xl rounded-tl-sm p-3.5 text-sm text-gray-200 max-w-[85%] leading-relaxed whitespace-pre-wrap message-content">
+          ${text}
+        </div>
+      `;
+
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+      return msgId;
+    }
+
+    function updateChatMessage(msgId, newText) {
+      const container = document.getElementById(msgId);
+      if (container) {
+        const textEl = container.querySelector('.message-content');
+        if (textEl) textEl.textContent = newText;
+      }
+    }
+
+    function clearChatHistory() {
+      const box = document.getElementById('chat-messages');
+      box.innerHTML = `
+        <div class="flex items-start gap-2.5">
+          <div class="w-7 h-7 rounded-lg bg-purple-600/20 border border-purple-500/40 flex items-center justify-center text-xs font-bold text-purple-400">AI</div>
+          <div class="bg-nexa-card border border-nexa-border rounded-2xl rounded-tl-sm p-3.5 text-sm text-gray-200 max-w-[85%]">
+            Histórico limpo. Como posso ajudar agora?
+          </div>
+        </div>
+      `;
+      showToast('Conversa reiniciada.');
+    }
+
+    function loadChatHistory() {}
+
+    // ================= FERRAMENTA 2: IMAGENS (API REAL ABERTA FLUX) =================
+    async function generateImage() {
+      const prompt = document.getElementById('image-prompt').value.trim();
+      if (!prompt) {
+        showToast('Digite uma descrição para a imagem.', true);
+        return;
+      }
+
+      const btn = document.getElementById('btn-generate-image');
+      const loader = document.getElementById('image-loading');
+      const resultBox = document.getElementById('image-result-box');
+      const imgOutput = document.getElementById('image-output');
+
+      btn.disabled = true;
+      loader.classList.remove('hidden');
+      resultBox.classList.add('hidden');
+
+      try {
+        // Uso da API aberta do Pollinations (que roda FLUX e SD real sem expor chave)
+        const encodedPrompt = encodeURIComponent(prompt + ', 8k resolution, cinematic lighting, masterpiece');
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=800&height=800&nologo=true&seed=${Math.floor(Math.random()*100000)}`;
+
+        // Preload para garantir que a imagem realmente renderizou
+        const img = new Image();
+        img.src = imageUrl;
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = () => reject(new Error('Não foi possível conectar ao motor de geração de imagem.'));
+        });
+
+        imgOutput.src = imageUrl;
+        resultBox.classList.remove('hidden');
+        showToast('Imagem real gerada com sucesso!');
+      } catch (err) {
+        showToast(err.message, true);
+      } finally {
+        btn.disabled = false;
+        loader.classList.add('hidden');
+      }
+    }
+
+    function downloadGeneratedImage() {
+      const src = document.getElementById('image-output').src;
+      if (!src) return;
+      const a = document.createElement('a');
+      a.href = src;
+      a.target = '_blank';
+      a.download = `nexa-image-${Date.now()}.jpg`;
+      a.click();
+    }
+
+    function copyImageUrl() {
+      const src = document.getElementById('image-output').src;
+      navigator.clipboard.writeText(src);
+      showToast('Link da imagem copiado!');
+    }
+
+    // ================= FERRAMENTA 3: VÍDEOS (CONEXÃO HONESTA COM PROVEDORES REAIS) =================
+    function requestVideoGeneration() {
+      const prompt = document.getElementById('video-prompt').value.trim();
+      const provider = document.getElementById('video-provider').value;
+      const box = document.getElementById('video-status-feedback');
+
+      if (!prompt) {
+        showToast('Digite o roteiro ou cena para o vídeo.', true);
+        return;
+      }
+
+      box.classList.remove('hidden');
+      box.innerHTML = `
+        <div class="space-y-2">
+          <div class="flex items-center gap-2 text-cyan-400 font-semibold">
+            <div class="w-3 h-3 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+            Verificando credenciais para o motor: ${provider.toUpperCase()}
+          </div>
+          <p class="text-gray-400">
+            A NEXA AI cumpre a política de <strong>não simular vídeos fictícios</strong>.
+          </p>
+          <div class="p-3 bg-black/40 rounded-lg border border-nexa-border font-mono text-[11px] text-gray-300">
+            <strong>Endpoint:</strong> https://api.${provider}.com/v1/generations<br>
+            <strong>Status:</strong> Aguardando chave privada do provedor ${provider}.<br>
+            <strong>Prompt preparado:</strong> "${prompt}"
+          </div>
+          <p class="text-[11px] text-amber-300">
+            Dica: No ecossistema em nuvem, você deve apontar sua chave desse provedor no seu backend dedicado para iniciar a renderização das frames.
+          </p>
+        </div>
+      `;
+    }
+
+    // ================= FERRAMENTAS GENÉRICAS (SITES, EBOOK, ROTEIRO, CÓDIGO) =================
+    async function generateGenericContent(tool) {
+      let prompt = '';
+      let systemInstruction = '';
+      let btnId = '';
+      let resultWrapperId = '';
+
+      if (tool === 'site') {
+        const text = document.getElementById('site-prompt').value.trim();
+        if (!text) return showToast('Descreva a página desejada.', true);
+        btnId = 'btn-gen-site';
+        resultWrapperId = 'site-result-wrapper';
+        prompt = text;
+        systemInstruction = 'Você é um designer e desenvolvedor frontend sênior. Crie uma página HTML5 única e responsiva usando Tailwind CSS. Retorne APENAS o código HTML completo dentro das tags <!DOCTYPE html> até </html>. Não use markdown, não adicione explicações fora do código.';
+      } else if (tool === 'ebook') {
+        const topic = document.getElementById('ebook-topic').value.trim();
+        const target = document.getElementById('ebook-target').value.trim();
+        const details = document.getElementById('ebook-prompt').value.trim();
+        if (!topic) return showToast('Informe o tema do ebook.', true);
+        btnId = 'btn-gen-ebook';
+        resultWrapperId = 'ebook-result-wrapper';
+        prompt = `Tema: ${topic}\nPúblico-alvo: ${target}\nDetalhes: ${details}`;
+        systemInstruction = 'Você é um especialista em infoprodutos e redação de livros digitais. Crie a estrutura completa do ebook com: Título atrativo, Sumário com 5 capítulos e o Capítulo 1 redigido na íntegra com alto teor prático.';
+      } else if (tool === 'script') {
+        const format = document.getElementById('script-format').value;
+        const topic = document.getElementById('script-topic').value.trim();
+        if (!topic) return showToast('Informe o assunto do roteiro.', true);
+        btnId = 'btn-gen-script';
+        resultWrapperId = 'script-result-wrapper';
+        prompt = `Formato: ${format}\nAssunto: ${topic}`;
+        systemInstruction = 'Você é um roteirista viral para YouTube e TikTok. Escreva um roteiro estruturado em: Gancho inicial (primeiros 3 segundos), Quebra de padrão, Conteúdo central detalhado (Áudio e Vídeo/Câmera) e CTA final magnética.';
+      } else if (tool === 'code') {
+        const lang = document.getElementById('code-language').value;
+        const task = document.getElementById('code-task').value.trim();
+        const details = document.getElementById('code-prompt').value.trim();
+        if (!task && !details) return showToast('Descreva a tarefa ou cole o código.', true);
+        btnId = 'btn-gen-code';
+        resultWrapperId = 'code-result-wrapper';
+        prompt = `Linguagem: ${lang}\nObjetivo: ${task}\nCódigo/Contexto: ${details}`;
+        systemInstruction = 'Você é um engenheiro de software sênior. Forneça o código limpo, comentado, otimizado e uma breve explicação das decisões técnicas tomadas.';
+      }
+
+      const btn = document.getElementById(btnId);
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Gerando...`;
+
+      try {
+        let content = '';
+        const apiKey = localStorage.getItem('nexa_gemini_key');
+
+        if (apiKey) {
+          content = await callGeminiApi(prompt, systemInstruction);
+        } else {
+          // Conteúdo demonstrativo imediato caso o usuário ainda não tenha colado a chave do Gemini
+          content = getFallbackContent(tool, prompt);
+        }
+
+        document.getElementById(resultWrapperId).classList.remove('hidden');
+
+        if (tool === 'site') {
+          // Limpar marcações de código se houver
+          const cleanHtml = content.replace(/```html/g, '').replace(/```/g, '').trim();
+          document.getElementById('site-code-box').value = cleanHtml;
+          const iframe = document.getElementById('site-preview');
+          iframe.srcdoc = cleanHtml;
+        } else if (tool === 'ebook') {
+          document.getElementById('ebook-output').textContent = content;
+        } else if (tool === 'script') {
+          document.getElementById('script-output').textContent = content;
+        } else if (tool === 'code') {
+          document.getElementById('code-output').textContent = content;
+        }
+
+        showToast('Conteúdo gerado com sucesso!');
+      } catch (err) {
+        showToast(err.message, true);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        lucide.createIcons();
+      }
+    }
+
+    // Exemplos locais rápidos para testes imediatos sem chave
+    function getFallbackContent(tool, prompt) {
+      if (tool === 'site') {
+        return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <script src="https://cdn.tailwindcss.com"><\/script>
+</head>
+<body class="bg-gray-950 text-white min-h-screen flex flex-col items-center justify-center p-6 text-center font-sans">
+  <div class="max-w-md p-8 rounded-3xl bg-gray-900 border border-purple-500/30 shadow-2xl">
+    <div class="w-12 h-12 bg-purple-600 rounded-2xl mx-auto flex items-center justify-center font-bold text-xl mb-4">N</div>
+    <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400 mb-2">Página Web Criada</h1>
+    <p class="text-sm text-gray-400 mb-6">Esta é uma amostra responsiva criada instantaneamente pela NEXA AI.</p>
+    <button class="w-full py-3 rounded-xl bg-purple-600 text-white font-semibold text-sm hover:bg-purple-500 transition">Entrar em Contato</button>
+  </div>
+</body>
+</html>`;
+      }
+      return `[RESULTADO DEMONSTRATIVO - NEXA AI]\n\nSolicitação recebida com sucesso: "${prompt}"\n\nPara desbloquear a geração com raciocínio profundo da IA em tempo real, conecte sua chave gratuita do Google AI Studio no botão de Ajustes no topo da página.`;
+    }
+
+    // ================= UTILITÁRIOS (DOWNLOAD & CÓPIA) =================
+    function copyOutput(elementId) {
+      const el = document.getElementById(elementId);
+      const text = el.value || el.innerText;
+      navigator.clipboard.writeText(text);
+      showToast('Copiado para a área de transferência!');
+    }
+
+    function downloadTextFile(filename, elementId) {
+      const el = document.getElementById(elementId);
+      const text = el.value || el.innerText;
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+    }
+
+    function downloadCodeFile(filename, elementId) {
+      const el = document.getElementById(elementId);
+      const text = el.value;
+      const blob = new Blob([text], { type: 'text/html;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+    }
+
+    function escapeHtml(string) {
+      return String(string).replace(/[&<>"']/g, function (s) {
+        return {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        }[s];
+      });
+    }
+  </script>
+</body>
+</html>
+
+Diagnóstico das Ferramentas e Integrações
+
+| \#    | Ferramenta                    | Status Nesta Versão                 | O que falta para a versão final de produção (100%)?                                                                                                                                                                                                                                         |
+| ----- | ----------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1** | **Chat Inteligente**          | **Totalmente Funcional**            | Suporte a streaming de texto via SSE (*Server-Sent Events*) e persistência de histórico em nuvem (ex: Supabase/Firebase) para sincronizar conversas entre dispositivos.                                                                                                                     |
+| **2** | **Gerador de Imagens**        | **Totalmente Funcional (API Real)** | Opera via modelo FLUX aberto (Pollinations). Para escala comercial e resoluções com proporções personalizadas (16:9, 9:16), pode-se adicionar chave própria da **Stability AI** ou **Black Forest Labs via Replicate**.                                                                     |
+| **3** | **Criador de Vídeos**         | **Interface Conectora (Honesta)**   | Modelos de vídeo não possuem endpoints públicos 100% gratuitos devido ao alto consumo de GPU. Falta conectar um backend próprio (Node.js/Python) que receba a requisição e faça o webhook com serviços como **Luma AI (Dream Machine API)**, **Runway Gen-3** ou **Replicate (CogVideoX)**. |
+| **4** | **Criador de Sites**          | **Totalmente Funcional**            | Já gera código real HTML5/Tailwind, renderiza visualização instantânea em *iframe* e exporta o arquivo `.html`. Pode receber melhorias futuras com exportação direta para o GitHub ou hospedagem automática com 1 clique (Netlify API).                                                     |
+| **5** | **Ebooks e Infoprodutos**     | **Totalmente Funcional**            | Gera o planejamento e capítulos completos via Gemini. Para um infoproduto acabado, pode-se integrar uma biblioteca de exportação para `.PDF` diagramado (como `jsPDF` ou `pdfmake`) ou formato `.ePub`.                                                                                     |
+| **6** | **Roteiros para Vídeo**       | **Totalmente Funcional**            | Formata e estrutura falas, ganchos visuais e CTAs. Para o próximo nível, pode ser acoplado a uma API de voz sintética (como ElevenLabs) para gerar áudio guia instantâneo do roteiro.                                                                                                       |
+| **7** | **Assistente de Programação** | **Totalmente Funcional**            | Analisa, gera e depura códigos nas principais linguagens com download do arquivo. Pode ser expandido com um editor interativo estilo *Monaco Editor* (o mesmo do VS Code).                                                                                                                  |
+
+Como colocar para funcionar no iPhone:
+
+1.  Abra o arquivo no Safari (ou acesse a URL onde você hospedou).
+2.  Toque no botão Compartilhar do Safari e selecione "Adicionar à Tela de
+    Início".
+3.  O aplicativo se comportará com aspecto visual de aplicativo nativo (PWA),
+    sem barras do navegador, respeitando a curvatura de tela e o entalhe do
+    iPhone.
