@@ -790,7 +790,7 @@ const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-
     function loadChatHistory() {}
 
     // ================= FERRAMENTA 2: IMAGENS (API REAL ABERTA FLUX) =================
-    async function generateImage() {
+    function downloadGeneratedImage()
       const prompt = document.getElementById('image-prompt').value.trim();
       if (!prompt) {
         showToast('Digite uma descrição para a imagem.', true);
